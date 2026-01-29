@@ -1,13 +1,28 @@
 {
   "name": "repro-langgraphjs-createagent-state",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.0"
+  "packageManager": "pnpm@10.28.0",
+  "version": "1.0.0",
+  "description": "Minimal repro for createAgent responseFormat state issue",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx index.ts"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.16",
+    "@langchain/google-genai": "^2.1.13",
+    "@langchain/langgraph": "^1.1.1",
+    "@t3-oss/env-core": "^0.13.10",
+    "dotenv": "^16.4.7",
+    "langchain": "^1.2.15",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
 }
