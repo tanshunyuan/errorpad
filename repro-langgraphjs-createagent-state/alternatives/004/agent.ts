@@ -34,7 +34,7 @@ const OverallState = new StateSchema({
 });
 
 const OutputState = new StateSchema({
-  structuredResponse: StructuredResponseSchema
+  structuredResponse: StructuredResponseSchema,
 });
 
 const mockResearchTool = tool(
@@ -101,32 +101,48 @@ const graph = new StateGraph({
 
     const messages: ToolMessage[] = [];
     let structuredResponse;
+    for (const toolCall of toolCalls) {
+      const tool = TOOLS_MAP[toolCall.name];
 
-    // Process all tools at once
-    await Promise.all(
-      toolCalls.map(async (toolCall) => {
-        const tool = TOOLS_MAP[toolCall.name];
+      if (!tool) {
+        throw new Error(`Unknown tool: ${toolCall.name}`);
+      }
+      try {
+        let observation;
 
         if ("parse" in tool) {
           const parsed = tool.parse(toolCall.args);
-          messages.push(
-            new ToolMessage({
-              content: JSON.stringify(parsed),
-              tool_call_id: toolCall.id,
-            }),
-          );
+          observation = JSON.stringify(parsed);
           structuredResponse = parsed;
-          return;
+        } else {
+          observation = await tool.invoke(toolCall);
         }
 
-        const observation = await tool.invoke(toolCall);
-        messages.push(observation);
-      }),
-    );
+        messages.push(
+          new ToolMessage({
+            content: observation,
+            tool_call_id: toolCall.id ?? "",
+            name: toolCall.name,
+          }),
+        );
+      } catch (error) {
+        // Return error as tool message
+        messages.push(
+          new ToolMessage({
+            content: error instanceof Error ? error.message : String(error),
+            tool_call_id: toolCall.id ?? "",
+            name: toolCall.name,
+          }),
+        );
+      }
+    }
 
     return new Command({
-      update: { messages, structuredResponse },
-    });
+      update: {
+        messages,
+        structuredResponse
+      }
+    })
   })
   .addEdge(START, "researcherNode")
   .addConditionalEdges(
