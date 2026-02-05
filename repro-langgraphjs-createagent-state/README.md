@@ -114,3 +114,25 @@ While working on this reproduction, I noticed a few things about the LangGraph.j
     * The method itself is public and safe to use, but it’s meant more for inspection and debugging than for consuming outputs.
 3.  **Is `.streamEvents()` an internal API?** `streamEvents` is used UI updates. If it's internal, what is the stable alternative for streaming tokens and tool events?
     * For actually reading structured output, .streamEvents() is stable and is the intended approach.
+
+LangGraph just forces the model to respond via a tool call and stores the parsed result as a ToolMessage in the message history.
+using `withStructuredOutput` as a tool call? 
+
+There's a two ways to achieve structured output:
+1. tool calling strategy: https://docs.langchain.com/oss/javascript/langchain/structured-output, requires `createAgent`
+2. multiple schema: https://docs.langchain.com/oss/javascript/langgraph/graph-api#multiple-schemas
+
+so with responseFormat it uses both output schema and tool call to generate a structuredResponse
+```
+  // Only include structuredResponse when responseFormat is defined
+  if (hasStructuredResponse) {
+    outputFields.structuredResponse = new UntrackedValue<any>();
+  }
+
+    output: new StateSchema({
+      messages: MessagesValue,
+      ...outputFields,
+    }),
+```
+
+maybe `.stream` is more appropiate to show results
