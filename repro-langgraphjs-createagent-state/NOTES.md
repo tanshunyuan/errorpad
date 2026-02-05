@@ -80,6 +80,8 @@ const structuredResponse = toolStrategy.parse(toolCall.args)
 ```
 
 ## Complete flow
+output schema is there only for type info
+
 ```txt
 1. User creates agent with responseFormat:
    createAgent({
