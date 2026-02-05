@@ -98,15 +98,19 @@ values: {
 }
 ```
 
-## 🤔 Questions & API Concerns
+## Answer
+
+> You're not doing anything wrong here. With `createAgent()`, structured output is not written into `state.values`. When you pass responseFormat, LangGraph just forces the model to respond via a tool call and stores the parsed result as a ToolMessage in the message history. That's why `values.structuredResponse` is undefined and you only see the data when you inspect the last tool message.
+>
+> If you really want something like values.structuredResponse, you’d need to build a custom graph and explicitly write that tool output into state yourself.
+
+## 🤔 Questions (Answered)
 
 While working on this reproduction, I noticed a few things about the LangGraph.js API that raised questions:
 
-1.  **How to properly type `.getState()`?**
-    TypeScript types the `values` as `never` or `any`, forcing manual casts. Can the state schema be inferred automatically from `createAgent`?
-
-2.  **Is `.getState()` an internal API?**
-    If `getState` is meant for internal use only, what is the recommended public API for retrieving the final state after streaming?
-
-3.  **Is `.streamEvents()` an internal API?**
-    `streamEvents` is used UI updates. If it's internal, what is the stable alternative for streaming tokens and tool events?
+1.  **How to properly type `.getState()`?** TypeScript types the `values` as `never` or `any`, forcing manual casts. Can the state schema be inferred automatically from `createAgent`?
+    * The reason .getState() shows values as never is simply because createAgent() builds a dynamic, prebuilt graph and doesn’t expose a typed state schema. TypeScript can’t infer what’s inside, so the typing collapses.
+2.  **Is `.getState()` an internal API?** If `getState` is meant for internal use only, what is the recommended public API for retrieving the final state after streaming?
+    * The method itself is public and safe to use, but it’s meant more for inspection and debugging than for consuming outputs.
+3.  **Is `.streamEvents()` an internal API?** `streamEvents` is used UI updates. If it's internal, what is the stable alternative for streaming tokens and tool events?
+    * For actually reading structured output, .streamEvents() is stable and is the intended approach.
